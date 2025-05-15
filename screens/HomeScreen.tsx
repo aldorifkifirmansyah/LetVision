@@ -1,0 +1,32 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { MenuButton } from '../components/MenuButton';
+import { useNavigation } from '@react-navigation/native';
+
+export const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>LetVision</Text>
+      <MenuButton title="Deteksi Pertumbuhan" onPress={() => navigation.navigate('GrowthUp')} />
+      
+      
+      {/* Fitur lain bisa ditambahkan di sini */}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+});
