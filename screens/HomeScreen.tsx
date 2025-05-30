@@ -10,7 +10,8 @@ export const HomeScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.title}>LetVision</Text>
       <MenuButton title="Deteksi Pertumbuhan" onPress={() => navigation.navigate('GrowthUp')} />
-      
+      <MenuButton title="Deteksi Penyakit" onPress={() => navigation.navigate('Disease')} />
+      <MenuButton title="Riwayat Deteksi" onPress={() => navigation.navigate('History')} />
       
       {/* Fitur lain bisa ditambahkan di sini */}
     </View>
