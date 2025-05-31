@@ -10,6 +10,10 @@ import { HistoryScreen } from "./screens/HistoryScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { MenuProvider } from "react-native-popup-menu";
 import "react-native-get-random-values";
+import { GrowthHistoryDetailScreen } from "./screens/GrowthHistoryDetailScreen";
+import { DiseaseHistoryDetailScreen } from "./screens/DiseaseHistoryDetailScreen";
+import { ArtikelScreen } from "./screens/ArtikelScreen";
+import { ArtikelViewerScreen } from "./screens/ArtikelViewerScreen";
 
 const Stack = createStackNavigator();
 
@@ -21,7 +25,7 @@ export default function App() {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ title: "LetVision" }}
+            options={{ title: "Beranda" }}
           />
           <Stack.Screen
             name="GrowthUp"
@@ -57,6 +61,38 @@ export default function App() {
                 shadowOpacity: 0,
               },
             }}
+          />
+          <Stack.Screen
+            name="GrowthHistoryDetail"
+            component={GrowthHistoryDetailScreen}
+            options={{
+              title: "Detail Pertumbuhan",
+              headerBackTitleVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="DiseaseHistoryDetail"
+            component={DiseaseHistoryDetailScreen}
+            options={{
+              title: "Detail Penyakit",
+              headerBackTitleVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Artikel"
+            component={ArtikelScreen}
+            options={{
+              title: "Artikel",
+              headerBackTitleVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="ArtikelViewer"
+            component={ArtikelViewerScreen}
+            options={({ route }) => ({
+              title: route.params.title,
+              headerBackTitleVisible: false,
+            })}
           />
         </Stack.Navigator>
       </NavigationContainer>

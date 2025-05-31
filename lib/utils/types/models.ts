@@ -11,6 +11,13 @@ export interface BaseHistoryItem {
   pinnedAt?: string;
 }
 
+// Pastikan interface NutrisiRekomendasi memiliki definisi yang tepat
+export interface NutrisiRekomendasi {
+  id: number;
+  nama: string;
+  deskripsi: string;
+}
+
 // Interface untuk growth history (dari history.ts)
 export interface GrowthHistoryItem extends BaseHistoryItem {
   detectionType: "growth";
@@ -18,6 +25,9 @@ export interface GrowthHistoryItem extends BaseHistoryItem {
   tahapNama?: string;
   estimasiPanen?: string; // Format: "±X hari" where X is a number
   harvestDate?: string;
+  // Tambahkan properti baru yang dibutuhkan
+  nutrisiRekomendasi?: NutrisiRekomendasi[]; // Array rekomendasi nutrisi
+  daysUntilHarvest?: number; // Jumlah hari hingga panen
 }
 
 // Interface untuk data penyakit (dari disease.ts)

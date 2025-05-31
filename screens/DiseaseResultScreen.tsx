@@ -1,17 +1,26 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, ScrollView, BackHandler, Alert } from "react-native";
-import { RouteProp, useFocusEffect } from "@react-navigation/native";
+import {
+  View,
+  Text,
+  ScrollView,
+  BackHandler,
+  Alert,
+  Image,
+  TouchableOpacity,
+  Linking, // Tambahkan impor Linking
+} from "react-native";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
 import { supabase } from "../lib/utils/services/supabaseService";
-import { DiseaseResultImage } from "../components/DiseaseResultImage";
-import { DiseaseInfo } from "../components/DiseaseInfo";
-import { PreventionList } from "../components/PreventionList";
-import { TreatmentGuide } from "../components/TreatmentGuide";
 import { Styles } from "../styles/Styles";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { historyService } from "../lib/utils/services/historyService";
 import { LabelInput } from "../components/LabelInput";
 import { v4 as uuidv4 } from "uuid";
-import { PenyakitInfo, PenangananItem } from "../lib/utils/types/models";
+import { PenyakitInfo } from "../lib/utils/types/models";
 
 type PredictionType = {
   bbox: number[];
@@ -35,6 +44,7 @@ type Props = {
 };
 
 export const DiseaseResult: React.FC<Props> = ({ route }) => {
+  const navigation = useNavigation();
   const { predictions, imageUri } = route.params;
   const prediction = predictions[0];
   const [isLoading, setIsLoading] = useState(true);
@@ -156,32 +166,96 @@ export const DiseaseResult: React.FC<Props> = ({ route }) => {
     return () => backHandler.remove();
   }, []);
 
+  // Tambahkan fungsi handleMoreInfo
+  const handleMoreInfo = () => {
+    if (diseaseInfo) {
+      const searchQuery = `penyakit selada ${diseaseName}`;
+      const encodedQuery = encodeURIComponent(searchQuery);
+      const googleURL = `https://www.google.com/search?q=${encodedQuery}`;
+
+      Linking.openURL(googleURL).catch(() => {
+        Alert.alert("Gagal", "Tidak dapat membuka browser");
+      });
+    } else {
+      Alert.alert("Info", "Informasi lebih lanjut tidak tersedia saat ini.");
+    }
+  };
+
   return (
     <View style={Styles.container}>
       {isLoading ? (
         <LoadingScreen />
       ) : (
-        <ScrollView>
-          <View style={Styles.card}>
-            <View style={Styles.resultContainer}>
-              <Text style={Styles.title}>{diseaseName}</Text>
-              <DiseaseResultImage imageUri={imageUri} />
+        <ScrollView contentContainerStyle={Styles.scrollContent}>
+          <View style={Styles.resultCard}>
+            <Text style={Styles.resultTitle}>{diseaseName}</Text>
 
+            <View style={Styles.sectionContainer}>
+              <View style={Styles.resultImageContainer}>
+                <Image
+                  source={{ uri: imageUri }}
+                  style={Styles.resultImage}
+                  resizeMode="cover"
+                />
+              </View>
+            </View>
+
+            <View style={Styles.sectionContainer}>
               <LabelInput
                 onLabelSubmit={handleLabelLock}
                 isLocked={isLabelLocked}
                 initialValue={labelInput}
                 onInputChange={setLabelInput}
               />
-
-              <DiseaseInfo description={diseaseDescription} />
-
-              {preventionSteps.length > 0 && (
-                <PreventionList steps={preventionSteps} />
-              )}
-
-              <TreatmentGuide diseaseName={diseaseName} />
             </View>
+
+            <View style={Styles.sectionContainer}>
+              <View style={Styles.infoContainer}>
+                <Text style={Styles.infoTitle}>Informasi Penyakit</Text>
+                <View style={Styles.infoContent}>
+                  <Text style={Styles.infoText}>
+                    {diseaseDescription || "Tidak ada informasi tersedia"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {preventionSteps.length > 0 && (
+              <View style={Styles.sectionContainer}>
+                <View style={Styles.preventionContainer}>
+                  <Text style={Styles.preventionTitle}>Langkah Penanganan</Text>
+                  <View style={Styles.preventionContent}>
+                    {preventionSteps.map((step, index) => (
+                      <View key={index} style={Styles.preventionItem}>
+                        <Text style={Styles.preventionNumber}>{index + 1}</Text>
+                        <Text style={Styles.preventionText}>{step}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Hanya tampilkan Panduan Lebih Lanjut jika penyakitnya BUKAN "Sehat" (ID 3) */}
+            {diseaseInfo && diseaseInfo.id !== 3 && (
+              <View style={Styles.sectionContainer}>
+                <View style={Styles.guideContainer}>
+                  <Text style={Styles.guideTitle}>Panduan Lebih Lanjut</Text>
+                  <Text style={Styles.guideText}>
+                    Dapatkan informasi lengkap tentang cara menangani{" "}
+                    {diseaseName} dan mencegah penyebaran lebih lanjut.
+                  </Text>
+                  <TouchableOpacity
+                    style={Styles.guideButton}
+                    onPress={handleMoreInfo}
+                  >
+                    <Text style={Styles.guideButtonText}>
+                      Pelajari Lebih Lanjut
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </View>
         </ScrollView>
       )}

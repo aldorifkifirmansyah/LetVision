@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { View, Text, ScrollView, BackHandler, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  BackHandler,
+  Alert,
+  Image,
+} from "react-native";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../lib/utils/services/supabaseService";
 import { GrowthResultImage } from "../components/GrowthResultImage";
@@ -177,6 +184,7 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
     }, [])
   );
 
+  // Perbarui fungsi saveInitialData
   useEffect(() => {
     const saveInitialData = async () => {
       if (!hasBeenSaved.current && stageData && !isLoading) {
@@ -184,7 +192,16 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
         const harvestDateInfo =
           harvestDate || calculateHarvestDate(stageData.estimasi_waktu_panen);
 
-        // Simpan dengan "No Label" di awal
+        // Tambahkan id ke nutrientRecommendations untuk menyesuaikan dengan NutrisiRekomendasi interface
+        const nutrientRecsWithId = nutrientRecommendations.map(
+          (rec, index) => ({
+            id: index + 1, // Gunakan index sebagai id sementara
+            nama: rec.nama,
+            deskripsi: rec.deskripsi,
+          })
+        );
+
+        // Simpan dengan data lengkap termasuk nutrisiRekomendasi dan daysUntilHarvest
         const savedItem = await historyService.saveHistory({
           id: processingImageId,
           imageUri: imageUri,
@@ -193,6 +210,8 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
           estimasiPanen: stageData.estimasi_waktu_panen,
           detectionType: "growth",
           harvestDate: harvestDateInfo?.harvestDate,
+          daysUntilHarvest: harvestDateInfo?.daysUntilHarvest, // Simpan daysUntilHarvest
+          nutrisiRekomendasi: nutrientRecsWithId, // Simpan rekomendasi nutrisi dengan id
           label: "No Label", // Default label
         });
 
@@ -201,7 +220,14 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
     };
 
     saveInitialData();
-  }, [stageData, isLoading, prediction?.class_id, imageUri, harvestDate]);
+  }, [
+    stageData,
+    isLoading,
+    prediction?.class_id,
+    imageUri,
+    harvestDate,
+    nutrientRecommendations,
+  ]);
 
   // Tambahkan handler untuk back button
   useEffect(() => {
@@ -243,32 +269,125 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
       {isLoading ? (
         <LoadingScreen />
       ) : (
-        <ScrollView>
-          <View style={Styles.card}>
-            <View style={Styles.resultContainer}>
-              <Text style={Styles.title}>{growthStageName}</Text>
-              <GrowthResultImage imageUri={imageUri} />
-              {prediction.class_id + 1 !== 4 && (
-                <LabelInput
-                  onLabelSubmit={handleLabelLock}
-                  isLocked={isLabelLocked}
-                  initialValue={labelInput}
-                  onInputChange={setLabelInput}
+        <ScrollView contentContainerStyle={Styles.scrollContent}>
+          <View style={Styles.resultCard}>
+            <Text style={Styles.resultTitle}>{growthStageName}</Text>
+
+            <View style={Styles.sectionContainer}>
+              <View style={Styles.resultImageContainer}>
+                <Image
+                  source={{ uri: imageUri }}
+                  style={Styles.resultImage}
+                  resizeMode="cover"
                 />
-              )}
-              {harvestEstimation && (
-                <HarvestEstimation estimation={harvestEstimation} />
-              )}
-              {harvestDate && (
-                <HarvestDate
-                  daysUntilHarvest={harvestDate.daysUntilHarvest}
-                  harvestDate={harvestDate.harvestDate}
-                />
-              )}
-              {nutrientRecommendations.length > 0 && (
-                <NutrientList nutrients={nutrientRecommendations} />
-              )}
+              </View>
             </View>
+
+            <View style={Styles.sectionContainer}>
+              <LabelInput
+                onLabelSubmit={handleLabelLock}
+                isLocked={isLabelLocked}
+                initialValue={labelInput}
+                onInputChange={setLabelInput}
+              />
+            </View>
+
+            {/* Container Estimasi Pertumbuhan telah dihapus */}
+
+            {/* Perkiraan Tanggal Panen dipindahkan ke posisi Estimasi Pertumbuhan */}
+            {harvestDate && (
+              <View style={Styles.sectionContainer}>
+                <View style={Styles.harvestDateContainer}>
+                  <Text style={Styles.harvestDateTitle}>
+                    Perkiraan Tanggal Panen:
+                  </Text>
+                  <Text style={Styles.harvestDateValue}>
+                    {harvestDate.harvestDate}
+                  </Text>
+                  <Text style={Styles.harvestDaysText}>
+                    (Sekitar {harvestDate.daysUntilHarvest} hari lagi)
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Tambahkan indikator khusus untuk tahap siap panen (ID 4) */}
+            {prediction.class_id + 1 === 4 && (
+              <View style={[Styles.sectionContainer, { marginTop: 8 }]}>
+                <View
+                  style={{
+                    backgroundColor: "#E3F2FD",
+                    borderWidth: 1,
+                    borderColor: "#2196F3",
+                    borderRadius: 12,
+                    padding: 16,
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: "#2196F3",
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 24,
+                        color: "#fff",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ✓
+                    </Text>
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "bold",
+                      color: "#0D47A1",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Siap Panen!
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: "#1565C0",
+                      fontSize: 14,
+                      lineHeight: 20,
+                    }}
+                  >
+                    Tanaman selada Anda sudah mencapai tahap siap panen. Panen
+                    selada saat daun masih segar dan belum menguning untuk hasil
+                    terbaik.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {nutrientRecommendations.length > 0 && (
+              <View style={Styles.sectionContainer}>
+                <View style={Styles.nutrientContainer}>
+                  <Text style={Styles.sectionTitle}>Rekomendasi Nutrisi</Text>
+                  {nutrientRecommendations.map((nutrient, index) => (
+                    <View key={index} style={Styles.nutrientItem}>
+                      <Text style={Styles.nutrientName}>{nutrient.nama}</Text>
+                      <Text style={Styles.nutrientDescription}>
+                        {nutrient.deskripsi}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Container Perkiraan Tanggal Panen lama telah dihapus */}
           </View>
         </ScrollView>
       )}

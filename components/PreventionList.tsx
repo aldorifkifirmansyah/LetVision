@@ -9,7 +9,7 @@ type Props = {
 export const PreventionList: React.FC<Props> = ({ steps }) => {
   return (
     <View style={Styles.preventionContainer}>
-      <Text style={Styles.preventionTitle}>Langkah Pencegahan</Text>
+      <Text style={Styles.preventionTitle}>Langkah Pencegahan di Masa yang Akan Datang</Text>
       <View style={Styles.preventionContent}>
         {steps.map((step, index) => (
           <View key={index} style={Styles.preventionItem}>

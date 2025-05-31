@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image } from "react-native";
+import { Image, View } from "react-native";
 import { Styles } from "../styles/Styles";
 
 type Props = {
@@ -8,11 +8,11 @@ type Props = {
 
 export const DiseaseResultImage: React.FC<Props> = ({ imageUri }) => {
   return (
-    <View style={Styles.imageContainer}>
+    <View style={Styles.resultImageContainer}>
       <Image
         source={{ uri: imageUri }}
-        style={Styles.image}
-        resizeMode="contain"
+        style={Styles.resultImage}
+        resizeMode="cover"
       />
     </View>
   );

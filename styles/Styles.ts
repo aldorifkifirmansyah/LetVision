@@ -1,14 +1,50 @@
 import { StyleSheet } from "react-native";
 
+// Definisikan variabel warna untuk keseragaman
+const colors = {
+  // Warna utama
+  primary: "#4CAF50",
+  primaryDark: "#388E3C",
+  primaryLight: "#C8E6C9",
+
+  // Warna aksen
+  accent: "#FF5252",
+  accentDark: "#D32F2F",
+  accentLight: "#FFCDD2",
+
+  // Warna teks
+  textPrimary: "#2C3E50",
+  textSecondary: "#7F8C8D",
+  textLight: "#FFFFFF",
+
+  // Warna background
+  background: "#F5F5F5",
+  cardBackground: "#FFFFFF",
+
+  // Warna status
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#FF5252",
+  info: "#2196F3",
+};
+
+const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+};
+
 export const Styles = StyleSheet.create({
   growthBadge: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
   },
   diseaseBadge: {
-    backgroundColor: "#FF5252",
+    backgroundColor: colors.accent,
   },
   detectionTypeText: {
-    color: "#FFFFFF",
+    color: colors.textLight,
     fontSize: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -16,10 +52,10 @@ export const Styles = StyleSheet.create({
   // Common styles
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     margin: 16,
     padding: 20,
@@ -35,7 +71,7 @@ export const Styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#2C3E50",
+    color: colors.textPrimary,
     marginBottom: 20,
     textAlign: "center",
   },
@@ -63,7 +99,7 @@ export const Styles = StyleSheet.create({
     elevation: 3,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.textLight,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -131,13 +167,12 @@ export const Styles = StyleSheet.create({
   estimationValue: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#4CAF50",
+    color: colors.primary,
     textAlign: "center",
     minWidth: "80%",
   },
   nutrientContainer: {
     width: "100%",
-    marginTop: 24,
     padding: 16,
     backgroundColor: "#F8F9FA",
     borderRadius: 12,
@@ -145,7 +180,7 @@ export const Styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2C3E50",
+    color: colors.textPrimary,
     marginBottom: 16,
   },
   nutrientItem: {
@@ -154,12 +189,12 @@ export const Styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: "#4CAF50",
+    borderLeftColor: colors.primary,
   },
   nutrientName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#2C3E50",
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   nutrientDescription: {
@@ -198,18 +233,19 @@ export const Styles = StyleSheet.create({
   historyTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2C3E50",
+    color: colors.textPrimary,
     flex: 1, // Add flex to allow text wrapping
     flexWrap: "wrap", // Enable text wrapping
   },
   historyDate: {
-    fontSize: 14,
-    color: "#7F8C8D",
-    marginTop: 4,
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2, // Kurangi margin top agar lebih dekat dengan title
+    marginBottom: 4, // Tambahkan margin bottom untuk jarak dengan konten di bawah
   },
   historyEstimation: {
     fontSize: 14,
-    color: "#4CAF50",
+    color: colors.primary,
     marginTop: 4,
   },
   historyList: {
@@ -223,7 +259,7 @@ export const Styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 16,
-    color: "#7F8C8D",
+    color: colors.textSecondary,
     textAlign: "center",
   },
   emptyContainer: {
@@ -238,13 +274,13 @@ export const Styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#2C3E50",
+    color: colors.textPrimary,
     marginBottom: 8,
     textAlign: "center",
   },
   emptyDescription: {
     fontSize: 14,
-    color: "#7F8C8D",
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
     paddingHorizontal: 32,
@@ -264,14 +300,14 @@ export const Styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#4CAF50",
+    borderColor: colors.primary,
   },
   filterButtonActive: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   filterButtonText: {
-    color: "#4CAF50",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "500",
   },
@@ -302,7 +338,7 @@ export const Styles = StyleSheet.create({
     gap: 12,
   },
   deleteButton: {
-    backgroundColor: "#FF5252",
+    backgroundColor: colors.accent,
   },
   selectedCard: {
     backgroundColor: "#E3F2FD",
@@ -312,7 +348,7 @@ export const Styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#4CAF50",
+    borderColor: colors.primary,
     marginRight: 12,
     justifyContent: "center",
     alignItems: "center",
@@ -321,15 +357,15 @@ export const Styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
   },
   menuOption: {
     padding: 12,
     fontSize: 16,
-    color: "#2C3E50",
+    color: colors.textPrimary,
   },
   deleteText: {
-    color: "#FF5252",
+    color: colors.accent,
   },
   harvestDateContainer: {
     width: "100%",
@@ -347,12 +383,12 @@ export const Styles = StyleSheet.create({
   harvestDateValue: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#4CAF50",
+    color: colors.primary,
     textAlign: "center",
   },
   harvestDaysText: {
     fontSize: 14,
-    color: "#7F8C8D",
+    color: colors.textSecondary,
     marginTop: 4,
   },
   disabledText: {
@@ -363,7 +399,6 @@ export const Styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#F8F9FA",
     borderRadius: 12,
-    marginBottom: 16, // Add bottom margin
   },
   labelInput: {
     backgroundColor: "#FFFFFF",
@@ -375,7 +410,7 @@ export const Styles = StyleSheet.create({
     marginBottom: 12,
   },
   labelButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
@@ -418,7 +453,7 @@ export const Styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#4CAF50",
+    borderColor: colors.primary,
     padding: 8,
     fontSize: 12,
   },
@@ -429,7 +464,7 @@ export const Styles = StyleSheet.create({
     gap: 8,
   },
   editLabelButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
     borderRadius: 4,
     paddingVertical: 4,
     paddingHorizontal: 8,
@@ -449,7 +484,7 @@ export const Styles = StyleSheet.create({
   pinnedCard: {
     backgroundColor: "#E8F5E9", // Warna hijau muda yang lebih soft
     borderLeftWidth: 3, // Tetap gunakan border left sebagai aksen
-    borderLeftColor: "#4CAF50",
+    borderLeftColor: colors.primary,
   },
   pinnedCardElevated: {
     // Shadow iOS yang lebih alami
@@ -470,23 +505,27 @@ export const Styles = StyleSheet.create({
     marginVertical: 2,
   },
   pinButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 8,
-    borderRadius: 4,
-    alignSelf: "flex-start",
+    borderRadius: 20,
+    zIndex: 2,
   },
   pinIcon: {
     width: 20,
     height: 20,
-    tintColor: "#1B5E20",
+    tintColor: "#666666",
   },
   pinnedIcon: {
-    tintColor: "#4CAF50",
+    tintColor: colors.primary,
   },
   pinnedIndicator: {
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 6,
     zIndex: 1,
@@ -571,7 +610,7 @@ export const Styles = StyleSheet.create({
 
   // Styles untuk PreventionList
   preventionContainer: {
-    marginTop: 16,
+    marginTop: 0,
     backgroundColor: "#FFF9F9",
     borderRadius: 8,
     padding: 16,
@@ -613,8 +652,6 @@ export const Styles = StyleSheet.create({
 
   // Styles untuk TreatmentGuide
   guideContainer: {
-    marginTop: 16,
-    marginBottom: 16,
     backgroundColor: "#F9F9FF",
     borderRadius: 8,
     padding: 16,
@@ -670,15 +707,6 @@ export const Styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // Swipe action untuk delete
-  deleteAction: {
-    backgroundColor: "#FF5252",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 80,
-    height: "100%",
-  },
-
   labelEditContainer: {
     marginTop: 8,
   },
@@ -702,7 +730,7 @@ export const Styles = StyleSheet.create({
     marginRight: 8,
   },
   labelSaveButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
   },
   labelCancelButton: {
     backgroundColor: "#CCCCCC",
@@ -712,11 +740,151 @@ export const Styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 12,
   },
-  // Selection mode styles
-
-  // History list
+  labelEditHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  labelEditTitle: {
+    fontSize: 12,
+    color: "#666666",
+  },
+  labelEditHint: {
+    fontSize: 10,
+    color: "#999999",
+    fontStyle: "italic",
+  },
 
   historyActions: {
     justifyContent: "center",
+  },
+  labelCardContainer: {
+    backgroundColor: "#F9F9F9",
+    borderRadius: 6,
+    padding: 8,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  labelCardText: {
+    fontSize: 12,
+    color: "#666666",
+    flex: 1,
+  },
+  editIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E8F5E9",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  editIndicatorText: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: "500",
+    marginLeft: 2,
+  },
+  charCountText: {
+    fontSize: 10,
+    color: "#999999",
+    textAlign: "right",
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  labelDefaultText: {
+    fontSize: 12,
+    color: "#999999",
+    fontStyle: "italic",
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  sectionContainer: {
+    marginBottom: spacing.lg,
+    width: "100%",
+  },
+  // Tambahkan style konsisten untuk hasil deteksi
+  resultCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    width: "100%",
+    padding: spacing.lg,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+
+  // Style konsisten untuk gambar hasil
+  resultImageContainer: {
+    width: "100%",
+    height: 250,
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 16,
+    backgroundColor: "#f5f5f5",
+  },
+
+  resultImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  // Style konsisten untuk judul hasil
+  resultTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.textPrimary,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+
+  // Style konsisten untuk hasil info container
+  resultInfoContainer: {
+    width: "100%",
+    padding: 16,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+
+  // Pemisah section yang konsisten
+  sectionDivider: {
+    height: 1,
+    backgroundColor: "#EEEEEE",
+    width: "100%",
+    marginVertical: 16,
+  },
+
+  // Tambahkan style baru ke StyleSheet
+  labelDisplayContainer: {
+    width: "100%",
+    padding: 16,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+  },
+  labelDisplayTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 8,
+  },
+  labelDisplayValue: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
 });

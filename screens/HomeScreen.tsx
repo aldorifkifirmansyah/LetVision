@@ -12,7 +12,7 @@ export const HomeScreen: React.FC = () => {
       <MenuButton title="Deteksi Pertumbuhan" onPress={() => navigation.navigate('GrowthUp')} />
       <MenuButton title="Deteksi Penyakit" onPress={() => navigation.navigate('Disease')} />
       <MenuButton title="Riwayat Deteksi" onPress={() => navigation.navigate('History')} />
-      
+      <MenuButton title="Artikel" onPress={() => navigation.navigate('Artikel')} />
       {/* Fitur lain bisa ditambahkan di sini */}
     </View>
   );
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 48,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 40,

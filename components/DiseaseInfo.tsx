@@ -9,7 +9,7 @@ type Props = {
 export const DiseaseInfo: React.FC<Props> = ({ description }) => {
   return (
     <View style={Styles.infoContainer}>
-      <Text style={Styles.infoTitle}>Informasi Penyakit</Text>
+      <Text style={Styles.infoTitle}>Deskripsi Penyakit</Text>
       <View style={Styles.infoContent}>
         <Text style={Styles.infoText}>{description}</Text>
       </View>

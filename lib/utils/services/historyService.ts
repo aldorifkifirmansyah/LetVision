@@ -137,4 +137,23 @@ export const historyService = {
       throw error;
     }
   },
+
+  async saveHistoryV2(historyData: Partial<HistoryItem>): Promise<HistoryItem> {
+    try {
+      const historyItems = await this.getHistory();
+      const newItem = {
+        ...historyData,
+        tanggalDeteksi: new Date().toISOString(),
+      };
+
+      // Simpan ke AsyncStorage
+      const updatedHistory = [newItem, ...historyItems];
+      await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+
+      return newItem as HistoryItem;
+    } catch (error) {
+      console.error("Error saving history:", error);
+      throw error;
+    }
+  },
 };

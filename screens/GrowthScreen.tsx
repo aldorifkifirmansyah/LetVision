@@ -94,19 +94,22 @@ export const GrowthUpScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={Styles.container}>
+      <ScrollView
+        style={Styles.container}
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
         <GrowthInstruction />
-        <GrowthActionButtons
-          isLoading={false} // Remove loading state from buttons
-          onPickImage={pickImage}
-          onTakePhoto={takePhoto}
-        />
       </ScrollView>
+      <GrowthActionButtons
+        isLoading={isLoading}
+        onPickImage={pickImage}
+        onTakePhoto={takePhoto}
+      />
       {isLoading && (
         <View style={Styles.loadingOverlay}>
           <View style={Styles.loadingContainer}>
             <ActivityIndicator size="large" color="#4CAF50" />
-            <Text style={Styles.loadingText}>Loading...</Text>
+            <Text style={Styles.loadingText}>Menganalisis gambar...</Text>
           </View>
         </View>
       )}

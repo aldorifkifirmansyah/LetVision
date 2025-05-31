@@ -18,8 +18,6 @@ import { historyService } from "../lib/utils/services/historyService";
 import {
   HistoryItem,
   DetectionType,
-  GrowthHistoryItem,
-  DiseaseHistoryItem,
   isGrowthHistoryItem,
   isDiseaseHistoryItem,
 } from "../lib/utils/types/models";
@@ -27,15 +25,15 @@ import { Styles } from "../styles/Styles";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { HistoryMenu } from "../components/HistoryMenu";
-import { Swipeable } from "react-native-gesture-handler";
 
 export const HistoryScreen = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [filterType, setFilterType] = useState<DetectionType | "all">("all");
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [editingLabel, setEditingLabel] = useState<string>("");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editingLabel, setEditingLabel] = useState("");
+  const [charCountColor, setCharCountColor] = useState("#999999");
   const [animatedItems, setAnimatedItems] = useState<{
     [key: string]: Animated.Value;
   }>({});
@@ -145,7 +143,7 @@ export const HistoryScreen = () => {
     }
   };
 
-  // Update renderItem di HistoryScreen.tsx untuk menampilkan informasi penyakit
+  // Update renderItem untuk mendukung label pada semua tipe card
   const renderItem = ({ item }: { item: HistoryItem }) => {
     // Badge untuk tipe deteksi
     const renderBadge = () => (
@@ -163,43 +161,33 @@ export const HistoryScreen = () => {
       </View>
     );
 
-    const renderRightActions = (id: string) => {
-      return (
-        <TouchableOpacity
-          style={Styles.deleteAction}
-          onPress={() => confirmDeleteSingle(id)}
-        >
-          <Ionicons name="trash-outline" size={24} color="white" />
-        </TouchableOpacity>
-      );
-    };
-
     return (
-      <Swipeable renderRightActions={() => renderRightActions(item.id)}>
-        <TouchableOpacity
-          onPress={() => handleItemPress(item)}
-          onLongPress={() => handleLongPress(item.id)}
+      <TouchableOpacity
+        onPress={() => handleItemPress(item)}
+        onLongPress={() => handleLongPress(item.id)}
+      >
+        <View
+          style={[
+            Styles.historyCard,
+            isSelectMode &&
+              selectedItems.includes(item.id) &&
+              Styles.selectedCard,
+            item.isPinned && Styles.pinnedCard,
+          ]}
         >
-          <View
-            style={[
-              Styles.historyCard,
-              isSelectMode &&
-                selectedItems.includes(item.id) &&
-                Styles.selectedCard,
-              item.isPinned && Styles.pinnedCard,
-            ]}
-          >
-            {/* Badge untuk tipe deteksi */}
-            {renderBadge()}
+          {/* Badge untuk tipe deteksi */}
+          {renderBadge()}
 
-            <Image
-              source={{ uri: item.imageUri }}
-              style={Styles.historyImage}
-              resizeMode="cover"
-            />
+          <Image
+            source={{ uri: item.imageUri }}
+            style={Styles.historyImage}
+            resizeMode="cover"
+          />
 
-            <View style={Styles.historyContent}>
-              <View style={{ flex: 1 }}>
+          <View style={Styles.historyContent}>
+            <View style={{ flex: 1 }}>
+              {/* Group title dan date bersama */}
+              <View>
                 <Text style={Styles.historyTitle}>
                   {isGrowthHistoryItem(item)
                     ? item.tahapNama
@@ -211,79 +199,104 @@ export const HistoryScreen = () => {
                 <Text style={Styles.historyDate}>
                   {formatDate(item.tanggalDeteksi)}
                 </Text>
-
-                {/* Tampilkan label dan tombol edit hanya untuk item dengan tipe pertumbuhan */}
-                {item.detectionType === "growth" && (
-                  <>
-                    {editingItemId === item.id ? (
-                      <View style={Styles.labelEditContainer}>
-                        <TextInput
-                          style={Styles.labelEditInput}
-                          value={editingLabel}
-                          onChangeText={setEditingLabel}
-                          autoFocus
-                          maxLength={50}
-                        />
-                        <View style={Styles.labelEditButtons}>
-                          <TouchableOpacity
-                            style={[
-                              Styles.labelEditButton,
-                              Styles.labelSaveButton,
-                            ]}
-                            onPress={() => saveLabel(item.id)}
-                          >
-                            <Text style={Styles.labelEditButtonText}>
-                              Simpan
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[
-                              Styles.labelEditButton,
-                              Styles.labelCancelButton,
-                            ]}
-                            onPress={cancelEditing}
-                          >
-                            <Text style={Styles.labelEditButtonText}>
-                              Batal
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    ) : (
-                      <TouchableOpacity
-                        onPress={() =>
-                          !isSelectMode &&
-                          startEditing(item.id, item.label || "")
-                        }
-                      >
-                        <Text style={Styles.labelColumn}>
-                          Label: {item.label || "No Label"}
-                          {!isSelectMode && (
-                            <Text style={Styles.editIcon}> ✏️</Text>
-                          )}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </>
-                )}
               </View>
 
-              <View style={Styles.historyActions}>
-                <TouchableOpacity
-                  style={Styles.pinButton}
-                  onPress={() => !isSelectMode && togglePin(item.id)}
-                >
-                  <Image
-                    source={require("../assets/pin-icon.png")}
-                    style={[Styles.pinIcon, item.isPinned && Styles.pinnedIcon]}
-                    resizeMode="contain"
+              {/* Label section untuk semua tipe card (growth dan disease) */}
+              {editingItemId === item.id ? (
+                <View style={Styles.labelEditContainer}>
+                  <View style={Styles.labelEditHeader}>
+                    <Text style={Styles.labelEditTitle}>
+                      Label{" "}
+                      {item.detectionType === "growth" ? "Tanaman" : "Penyakit"}
+                      :
+                    </Text>
+                    <Text style={Styles.labelEditHint}>
+                      Maksimal 15 karakter
+                    </Text>
+                  </View>
+                  <TextInput
+                    style={Styles.labelEditInput}
+                    value={editingLabel}
+                    onChangeText={(text) => {
+                      setEditingLabel(text);
+                      // Update warna penghitung karakter berdasarkan panjang
+                      if (text.length > 12) {
+                        setCharCountColor("#FF5252");
+                      } else if (text.length > 9) {
+                        setCharCountColor("#FFA726");
+                      } else {
+                        setCharCountColor("#999999");
+                      }
+                    }}
+                    autoFocus
+                    maxLength={15}
                   />
+                  <Text
+                    style={[Styles.charCountText, { color: charCountColor }]}
+                  >
+                    {editingLabel.length}/15 karakter
+                  </Text>
+                  <View style={Styles.labelEditButtons}>
+                    <TouchableOpacity
+                      style={[Styles.labelEditButton, Styles.labelSaveButton]}
+                      onPress={() => saveLabel(item.id)}
+                    >
+                      <Text style={Styles.labelEditButtonText}>Simpan</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[Styles.labelEditButton, Styles.labelCancelButton]}
+                      onPress={cancelEditing}
+                    >
+                      <Text style={Styles.labelEditButtonText}>Batal</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={Styles.labelCardContainer}
+                  onPress={() =>
+                    !isSelectMode &&
+                    startEditing(item.id, item.label || "No Label")
+                  }
+                >
+                  <Text
+                    style={
+                      item.label === "No Label"
+                        ? Styles.labelDefaultText
+                        : Styles.labelCardText
+                    }
+                    numberOfLines={1}
+                  >
+                    {item.label || "No Label"}
+                  </Text>
+                  {!isSelectMode && (
+                    <View style={Styles.editIndicator}>
+                      <Ionicons
+                        name="pencil-outline"
+                        size={12}
+                        color="#4CAF50"
+                      />
+                      <Text style={Styles.editIndicatorText}>Edit</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
-              </View>
+              )}
             </View>
           </View>
-        </TouchableOpacity>
-      </Swipeable>
+
+          {/* Tombol pin diposisikan di kanan bawah */}
+          <TouchableOpacity
+            style={Styles.pinButton}
+            onPress={() => !isSelectMode && togglePin(item.id)}
+          >
+            <Image
+              source={require("../assets/pin-icon.png")}
+              style={[Styles.pinIcon, item.isPinned && Styles.pinnedIcon]}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -291,17 +304,11 @@ export const HistoryScreen = () => {
     if (isSelectMode) {
       toggleSelectItem(item.id);
     } else {
-      // Navigate to detail screen berdasarkan tipe deteksi
+      // Navigasi ke screen detail riwayat berdasarkan tipe deteksi
       if (isGrowthHistoryItem(item)) {
-        navigation.navigate("GrowthResult", {
-          imageUri: item.imageUri,
-          predictions: [{ class_id: item.tahapId - 1 }],
-        });
+        navigation.navigate("GrowthHistoryDetail", { historyItem: item });
       } else if (isDiseaseHistoryItem(item)) {
-        navigation.navigate("DiseaseResult", {
-          imageUri: item.imageUri,
-          predictions: [{ class_id: item.penyakitId - 1 }],
-        });
+        navigation.navigate("DiseaseHistoryDetail", { historyItem: item });
       }
     }
   };
@@ -378,23 +385,22 @@ export const HistoryScreen = () => {
   };
 
   const startEditing = (id: string, currentLabel: string) => {
+    setEditingLabel(currentLabel === "No Label" ? "" : currentLabel);
     setEditingItemId(id);
-    setEditingLabel(currentLabel);
   };
 
   const cancelEditing = () => {
     setEditingItemId(null);
     setEditingLabel("");
+    setCharCountColor("#999999");
   };
 
   const saveLabel = async (id: string) => {
-    if (!editingLabel.trim()) {
-      Alert.alert("Label tidak valid", "Label tidak boleh kosong");
-      return;
-    }
+    const finalLabel =
+      editingLabel.trim() === "" ? "No Label" : editingLabel.trim();
 
     try {
-      await historyService.updateLabel(id, editingLabel.trim());
+      await historyService.updateLabel(id, finalLabel);
       await loadHistory();
       cancelEditing();
     } catch (error) {

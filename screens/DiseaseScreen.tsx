@@ -58,6 +58,7 @@ export const DiseaseScreen = () => {
         });
       }
     } catch (error) {
+      console.error("Error uploading image:", error);
       Alert.alert("Gagal", "Deteksi gagal. Silakan coba lagi.", [
         { text: "OK" },
       ]);
@@ -93,14 +94,22 @@ export const DiseaseScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={Styles.container}>
+      <ScrollView
+        style={Styles.container}
+        contentContainerStyle={{ paddingBottom: 140 }} // Tambahkan padding bawah untuk menghindari tombol menutupi konten
+      >
+        {/* Komponen instruksi */}
         <DiseaseInstruction />
-        <DiseaseActionButtons
-          isLoading={isLoading}
-          onPickImage={pickImage}
-          onTakePhoto={takePhoto}
-        />
       </ScrollView>
+
+      {/* Tombol tetap di bawah */}
+      <DiseaseActionButtons
+        isLoading={isLoading}
+        onPickImage={pickImage}
+        onTakePhoto={takePhoto}
+      />
+
+      {/* Loading overlay tetap berada di paling atas */}
       {isLoading && (
         <View style={Styles.loadingOverlay}>
           <View style={Styles.loadingContainer}>
