@@ -10,7 +10,6 @@ import {
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../lib/utils/services/supabaseService";
 import { GrowthResultImage } from "../components/GrowthResultImage";
-import { HarvestEstimation } from "../components/HarvestEstimation";
 import { NutrientList } from "../components/NutrientList";
 import { HarvestDate } from "../components/HarvestDate";
 import { Styles } from "../styles/Styles";
@@ -20,7 +19,7 @@ import { format, addDays } from "date-fns";
 import { id } from "date-fns/locale";
 import { LabelInput } from "../components/LabelInput";
 import { useNavigation } from "@react-navigation/native";
-import { v4 as uuidv4 } from "uuid";
+import uuid from "react-native-uuid";
 
 type PredictionType = {
   bbox: number[];
@@ -62,10 +61,30 @@ type HistoryItem = {
   tanggalDeteksi: string;
 };
 
-// Add this type definition at the top with other types
+// Update tipe StageData untuk mencakup semua kolom tabel tahap_pertumbuhan_baru
 type StageData = {
+  id: number;
   nama: string;
   estimasi_waktu_panen: string;
+  ec_min: number;
+  ec_max: number;
+  ph_min: number;
+  ph_max: number;
+  keterangan?: string;
+  // Hapus ab_mix_ml dan poc_ml dari tipe data
+};
+
+type FertilizerData = {
+  id: number;
+  nama_pupuk: string;
+};
+
+type FertilizerDose = {
+  id: number;
+  tahap_id: number;
+  pupuk_id: number;
+  dosis_ml: number;
+  pupuk?: FertilizerData;
 };
 
 export const GrowthResult: React.FC<Props> = ({ route }) => {
@@ -74,6 +93,7 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
   const prediction = predictions[0];
   const [isLoading, setIsLoading] = useState(true);
   const [growthStageName, setGrowthStageName] = useState<string>("");
+  // Tetap pertahankan state harvestEstimation karena mungkin digunakan di tempat lain
   const [harvestEstimation, setHarvestEstimation] = useState<string>("");
   const [nutrientRecommendations, setNutrientRecommendations] = useState<
     Array<{
@@ -85,7 +105,9 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
   const [labelInput, setLabelInput] = useState("");
   const [isLabelLocked, setIsLabelLocked] = useState(false);
   const [stageData, setStageData] = useState<StageData | null>(null);
-  const [processingImageId, setProcessingImageId] = useState<string>(uuidv4());
+  const [processingImageId, setProcessingImageId] = useState<string>(
+    uuid.v4().toString()
+  );
   const [finalLabel, setFinalLabel] = useState<string | null>(null);
   const hasBeenSaved = useRef(false);
 
@@ -95,9 +117,10 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
       try {
         const adjustedClassId = prediction.class_id + 1;
 
+        // Ambil data tahap pertumbuhan
         const { data: fetchedStageData, error: stageError } = await supabase
           .from("tahap_pertumbuhan")
-          .select("nama, estimasi_waktu_panen")
+          .select("*")
           .eq("id", adjustedClassId)
           .single();
 
@@ -106,6 +129,7 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
           setGrowthStageName(prediction.class_name);
           setHarvestEstimation("");
         } else if (fetchedStageData) {
+          // Update state
           setStageData(fetchedStageData);
           setGrowthStageName(fetchedStageData.nama);
           setHarvestEstimation(fetchedStageData.estimasi_waktu_panen);
@@ -116,29 +140,58 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
           );
           setHarvestDate(harvestDateInfo);
 
-          // Fetch nutrient recommendations
-          const { data: nutrientData, error: nutrientError } = await supabase
-            .from("tahap_nutrisi")
+          // Ambil dosis pupuk dengan join ke tabel pupuk
+          const { data: fertilizerDoses, error: dosesError } = await supabase
+            .from("dosis_pupuk")
             .select(
               `
-              *,
-              nutrisi_info!inner (
-                nama_nutrisi,
-                deskripsi
-              )
-            `
+            id,
+            dosis_ml,
+            pupuk_id,
+            pupuk:pupuk_id(id, nama_pupuk)
+          `
             )
             .eq("tahap_id", adjustedClassId);
 
-          if (nutrientError) {
-            console.error("Error fetching nutrients:", nutrientError);
-          } else if (nutrientData) {
-            const recommendations = nutrientData.map((item) => ({
-              nama: item.nutrisi_info.nama_nutrisi,
-              deskripsi: item.nutrisi_info.deskripsi,
-            }));
-            setNutrientRecommendations(recommendations);
+          if (dosesError) {
+            console.error("Error fetching fertilizer doses:", dosesError);
           }
+
+          // Buat rekomendasi nutrisi
+          const recommendations = [];
+
+          // Tambahkan rekomendasi dosis pupuk
+          if (fertilizerDoses && fertilizerDoses.length > 0) {
+            fertilizerDoses.forEach((dose) => {
+              if (dose.dosis_ml > 0 && dose.pupuk) {
+                recommendations.push({
+                  nama: dose.pupuk.nama_pupuk,
+                  deskripsi: `Gunakan ${dose.dosis_ml}ml ${dose.pupuk.nama_pupuk} per liter air.`,
+                });
+              }
+            });
+          }
+
+          // EC dan pH
+          recommendations.push({
+            nama: "Electrical Conductivity (EC)",
+            deskripsi: `Pertahankan EC antara ${fetchedStageData.ec_min} - ${fetchedStageData.ec_max} mS/cm.`,
+          });
+
+          recommendations.push({
+            nama: "pH Level",
+            deskripsi: `Jaga pH pada rentang ${fetchedStageData.ph_min} - ${fetchedStageData.ph_max}.`,
+          });
+
+          // Tambahkan keterangan jika ada
+          if (fetchedStageData.keterangan) {
+            recommendations.push({
+              nama: "Catatan Tambahan",
+              deskripsi: fetchedStageData.keterangan,
+            });
+          }
+
+          setNutrientRecommendations(recommendations);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -184,7 +237,7 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
     }, [])
   );
 
-  // Perbarui fungsi saveInitialData
+  // Perbarui fungsi saveInitialData untuk tidak lagi mereferensikan ab_mix_ml dan poc_ml
   useEffect(() => {
     const saveInitialData = async () => {
       if (!hasBeenSaved.current && stageData && !isLoading) {
@@ -201,21 +254,58 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
           })
         );
 
-        // Simpan dengan data lengkap termasuk nutrisiRekomendasi dan daysUntilHarvest
-        const savedItem = await historyService.saveHistory({
-          id: processingImageId,
-          imageUri: imageUri,
-          tahapId: adjustedClassId,
-          tahapNama: stageData.nama,
-          estimasiPanen: stageData.estimasi_waktu_panen,
-          detectionType: "growth",
-          harvestDate: harvestDateInfo?.harvestDate,
-          daysUntilHarvest: harvestDateInfo?.daysUntilHarvest, // Simpan daysUntilHarvest
-          nutrisiRekomendasi: nutrientRecsWithId, // Simpan rekomendasi nutrisi dengan id
-          label: "No Label", // Default label
-        });
+        try {
+          // Ambil data dosis pupuk untuk disimpan dalam riwayat
+          const { data: fertilizerDoses, error: dosesError } = await supabase
+            .from("dosis_pupuk")
+            .select(
+              `
+            id,
+            dosis_ml,
+            pupuk_id,
+            pupuk:pupuk_id(id, nama_pupuk)
+          `
+            )
+            .eq("tahap_id", adjustedClassId);
 
-        hasBeenSaved.current = true;
+          // Buat objek dengan data pupuk untuk disimpan
+          const fertilizerData = fertilizerDoses
+            ? fertilizerDoses.reduce((acc, dose) => {
+                if (dose.pupuk) {
+                  // Gunakan nama_pupuk sebagai key dan dosis_ml sebagai value
+                  acc[dose.pupuk.nama_pupuk] = dose.dosis_ml;
+                }
+                return acc;
+              }, {} as Record<string, number>)
+            : {};
+
+          // Simpan dengan data lengkap termasuk data nutrisi
+          await historyService.saveHistory({
+            id: processingImageId,
+            imageUri: imageUri,
+            tahapId: adjustedClassId,
+            tahapNama: stageData.nama,
+            estimasiPanen: stageData.estimasi_waktu_panen,
+            detectionType: "growth",
+            harvestDate: harvestDateInfo?.harvestDate,
+            daysUntilHarvest: harvestDateInfo?.daysUntilHarvest,
+            nutrisiRekomendasi: nutrientRecsWithId,
+            label: "No Label",
+            // Data EC dan pH dari tabel tahap_pertumbuhan
+            ecMin: stageData.ec_min,
+            ecMax: stageData.ec_max,
+            phMin: stageData.ph_min,
+            phMax: stageData.ph_max,
+            // Tambahkan data pupuk dari fertilizerData
+            ...fertilizerData,
+            // Tambahkan keterangan jika tersedia
+            ...(stageData.keterangan && { keterangan: stageData.keterangan }),
+          });
+
+          hasBeenSaved.current = true;
+        } catch (error) {
+          console.error("Error saving growth history:", error);
+        }
       }
     };
 
@@ -273,14 +363,9 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
           <View style={Styles.resultCard}>
             <Text style={Styles.resultTitle}>{growthStageName}</Text>
 
+            {/* Menggunakan GrowthResultImage Component */}
             <View style={Styles.sectionContainer}>
-              <View style={Styles.resultImageContainer}>
-                <Image
-                  source={{ uri: imageUri }}
-                  style={Styles.resultImage}
-                  resizeMode="cover"
-                />
-              </View>
+              <GrowthResultImage imageUri={imageUri} />
             </View>
 
             <View style={Styles.sectionContainer}>
@@ -292,26 +377,17 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
               />
             </View>
 
-            {/* Container Estimasi Pertumbuhan telah dihapus */}
-
-            {/* Perkiraan Tanggal Panen dipindahkan ke posisi Estimasi Pertumbuhan */}
+            {/* Perkiraan Tanggal Panen menggunakan HarvestDate Component */}
             {harvestDate && (
               <View style={Styles.sectionContainer}>
-                <View style={Styles.harvestDateContainer}>
-                  <Text style={Styles.harvestDateTitle}>
-                    Perkiraan Tanggal Panen:
-                  </Text>
-                  <Text style={Styles.harvestDateValue}>
-                    {harvestDate.harvestDate}
-                  </Text>
-                  <Text style={Styles.harvestDaysText}>
-                    (Sekitar {harvestDate.daysUntilHarvest} hari lagi)
-                  </Text>
-                </View>
+                <HarvestDate
+                  harvestDate={harvestDate.harvestDate}
+                  daysUntilHarvest={harvestDate.daysUntilHarvest}
+                />
               </View>
             )}
 
-            {/* Tambahkan indikator khusus untuk tahap siap panen (ID 4) */}
+            {/* Indikator tahap siap panen tetap sama */}
             {prediction.class_id + 1 === 4 && (
               <View style={[Styles.sectionContainer, { marginTop: 8 }]}>
                 <View
@@ -324,6 +400,7 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
                     alignItems: "center",
                   }}
                 >
+                  {/* Konten indikator siap panen tetap sama */}
                   <View
                     style={{
                       backgroundColor: "#2196F3",
@@ -371,23 +448,13 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
               </View>
             )}
 
-            {nutrientRecommendations.length > 0 && (
-              <View style={Styles.sectionContainer}>
-                <View style={Styles.nutrientContainer}>
-                  <Text style={Styles.sectionTitle}>Rekomendasi Nutrisi</Text>
-                  {nutrientRecommendations.map((nutrient, index) => (
-                    <View key={index} style={Styles.nutrientItem}>
-                      <Text style={Styles.nutrientName}>{nutrient.nama}</Text>
-                      <Text style={Styles.nutrientDescription}>
-                        {nutrient.deskripsi}
-                      </Text>
-                    </View>
-                  ))}
+            {/* Menggunakan NutrientList Component - hanya tampilkan jika BUKAN di tahap siap panen */}
+            {nutrientRecommendations.length > 0 &&
+              prediction.class_id + 1 !== 4 && (
+                <View style={Styles.sectionContainer}>
+                  <NutrientList nutrients={nutrientRecommendations} />
                 </View>
-              </View>
-            )}
-
-            {/* Container Perkiraan Tanggal Panen lama telah dihapus */}
+              )}
           </View>
         </ScrollView>
       )}

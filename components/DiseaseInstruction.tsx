@@ -4,16 +4,19 @@ import { DiseaseGuideImage } from "./DiseaseGuideImage";
 import { Styles } from "../styles/Styles";
 
 const instructions = [
-  "Pastikan daun terlihat jelas dan tidak terhalang",
-  "Ambil foto pada area yang menunjukkan gejala penyakit",
-  "Hindari bayangan yang menutupi area dengan gejala",
-  "Pastikan pencahayaan cukup terang",
+  "Pastikan pencahayaan cukup dan merata (usahakan tanpa bayangan)",
+  "Fokuskan pengambilan gambar pada daun selada yang menunjukkan gejala penyakit",
+  "Ambil gambar dari jarak dekat sekitar 10–20 cm agar gejala terlihat jelas",
+  "Ambil gambar dari sudut tegak lurus terhadap permukaan daun",
+  "Pastikan bagian daun yang terkena gejala terlihat utuh dalam frame",
+  "Hindari pengambilan gambar yang blur atau goyang",
+  "Jangan sampai ada objek asing yang menutupi bagian daun yang diperiksa"
 ];
 
 export const DiseaseInstruction = () => (
   <View style={Styles.card}>
     <View style={styles.instructionContainer}>
-      <Text style={Styles.title}>CARA MENGAMBIL GAMBAR PENYAKIT DAUN</Text>
+      <Text style={Styles.title}>CARA MENGAMBIL GAMBAR YANG BENAR</Text>
       <DiseaseGuideImage />
       <View style={styles.instructionList}>
         {instructions.map((instruction, index) => (

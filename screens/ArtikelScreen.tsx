@@ -114,7 +114,6 @@ export const ArtikelScreen: React.FC<ArtikelScreenProps> = ({ navigation }) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        <Text style={styles.headerTitle}>Artikel Seputar Selada</Text>
 
         {/* Search bar */}
         <View style={styles.searchContainer}>
@@ -191,19 +190,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    padding: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#2E7D32",
+    paddingTop: 16,
+    paddingLeft: 16,
+    // Tidak ada paddingRight
   },
   // Search styles
   searchContainer: {
     flexDirection: "row",
     marginBottom: 16,
     position: "relative",
+    paddingRight: 16, // Perlu padding sendiri
   },
   searchInput: {
     flex: 1,
@@ -239,6 +235,7 @@ const styles = StyleSheet.create({
   },
   articleList: {
     paddingVertical: 8,
+    paddingRight: 16, // Padding kanan untuk memberi jarak antara konten dan scrollbar
   },
   articleCard: {
     backgroundColor: "#F1F8E9",
@@ -248,6 +245,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: "#8BC34A",
     elevation: 2,
+    // Tidak perlu marginRight
   },
   articleTitle: {
     fontSize: 18,

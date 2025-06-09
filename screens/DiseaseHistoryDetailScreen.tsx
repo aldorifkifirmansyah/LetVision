@@ -5,8 +5,7 @@ import {
   ScrollView,
   Image,
   BackHandler,
-  TouchableOpacity,
-  Linking,
+  TouchableOpacity, // Mungkin masih diperlukan untuk UI lain
   Alert,
 } from "react-native";
 import { RouteProp } from "@react-navigation/native";
@@ -14,6 +13,7 @@ import { Styles } from "../styles/Styles";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { supabase } from "../lib/utils/services/supabaseService";
 import { isDiseaseHistoryItem } from "../lib/utils/types/models";
+import { TreatmentGuide } from "../components/TreatmentGuide";
 
 type RootStackParamList = {
   DiseaseHistoryDetail: {
@@ -77,19 +77,6 @@ export const DiseaseHistoryDetailScreen: React.FC<Props> = ({ route }) => {
 
     return () => backHandler.remove();
   }, []);
-
-  // Fungsi untuk membuka browser dengan pencarian Google
-  const handleMoreInfo = () => {
-    if (historyItem && isDiseaseHistoryItem(historyItem)) {
-      const searchQuery = `penyakit selada ${historyItem.penyakitNama}`;
-      const encodedQuery = encodeURIComponent(searchQuery);
-      const googleURL = `https://www.google.com/search?q=${encodedQuery}`;
-
-      Linking.openURL(googleURL).catch(() => {
-        Alert.alert("Gagal", "Tidak dapat membuka browser");
-      });
-    }
-  };
 
   if (!isDiseaseHistoryItem(historyItem)) {
     return (
@@ -165,25 +152,11 @@ export const DiseaseHistoryDetailScreen: React.FC<Props> = ({ route }) => {
               </View>
             )}
 
+            {/* 4. Ganti bagian "Panduan Lebih Lanjut" dengan TreatmentGuide */}
             {/* Panduan Lebih Lanjut - hanya tampilkan jika penyakitnya BUKAN "Sehat" (ID 3) */}
             {historyItem.penyakitId !== 3 && (
               <View style={Styles.sectionContainer}>
-                <View style={Styles.guideContainer}>
-                  <Text style={Styles.guideTitle}>Panduan Lebih Lanjut</Text>
-                  <Text style={Styles.guideText}>
-                    Dapatkan informasi lengkap tentang cara menangani{" "}
-                    {historyItem.penyakitNama} dan mencegah penyebaran lebih
-                    lanjut.
-                  </Text>
-                  <TouchableOpacity
-                    style={Styles.guideButton}
-                    onPress={handleMoreInfo}
-                  >
-                    <Text style={Styles.guideButtonText}>
-                      Pelajari Lebih Lanjut
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <TreatmentGuide diseaseName={historyItem.penyakitNama} />
               </View>
             )}
           </View>

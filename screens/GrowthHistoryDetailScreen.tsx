@@ -173,7 +173,26 @@ export const GrowthHistoryDetailScreen: React.FC<Props> = ({ route }) => {
               </View>
             )}
 
-            {/* Tambahkan indikator khusus untuk tahap siap panen (ID 4) */}
+            {/* Rekomendasi Nutrisi - hanya tampilkan jika BUKAN di tahap siap panen (tahapId !== 4) */}
+            {historyItem.nutrisiRekomendasi &&
+              historyItem.nutrisiRekomendasi.length > 0 &&
+              historyItem.tahapId !== 4 && (
+                <View style={Styles.sectionContainer}>
+                  <View style={Styles.nutrientContainer}>
+                    <Text style={Styles.sectionTitle}>Rekomendasi Nutrisi</Text>
+                    {historyItem.nutrisiRekomendasi.map((nutrient) => (
+                      <View key={nutrient.id} style={Styles.nutrientItem}>
+                        <Text style={Styles.nutrientName}>{nutrient.nama}</Text>
+                        <Text style={Styles.nutrientDescription}>
+                          {nutrient.deskripsi}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+            {/* Tambahkan indikator Siap Panen jika tahap = 4 */}
             {historyItem.tahapId === 4 && (
               <View style={[Styles.sectionContainer, { marginTop: 8 }]}>
                 <View
@@ -229,23 +248,6 @@ export const GrowthHistoryDetailScreen: React.FC<Props> = ({ route }) => {
                     selada saat daun masih segar dan belum menguning untuk hasil
                     terbaik.
                   </Text>
-                </View>
-              </View>
-            )}
-
-            {/* Rekomendasi Nutrisi */}
-            {nutrisiRekomendasiData && nutrisiRekomendasiData.length > 0 && (
-              <View style={Styles.sectionContainer}>
-                <View style={Styles.nutrientContainer}>
-                  <Text style={Styles.sectionTitle}>Rekomendasi Nutrisi</Text>
-                  {nutrisiRekomendasiData.map((nutrient, index) => (
-                    <View key={index} style={Styles.nutrientItem}>
-                      <Text style={Styles.nutrientName}>{nutrient.nama}</Text>
-                      <Text style={Styles.nutrientDescription}>
-                        {nutrient.deskripsi}
-                      </Text>
-                    </View>
-                  ))}
                 </View>
               </View>
             )}

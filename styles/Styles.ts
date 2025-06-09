@@ -373,7 +373,6 @@ export const Styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
     borderRadius: 12,
     alignItems: "center",
-    marginTop: 16,
   },
   harvestDateTitle: {
     fontSize: 16,
@@ -508,7 +507,6 @@ export const Styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 8,
     borderRadius: 20,
     zIndex: 2,

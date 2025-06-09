@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Linking, Alert } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Styles } from "../styles/Styles";
 
 type Props = {
@@ -7,19 +8,10 @@ type Props = {
 };
 
 export const TreatmentGuide: React.FC<Props> = ({ diseaseName }) => {
-  const handleMoreInfo = () => {
-    // Encode search term for Google search
-    const searchTerm = encodeURIComponent(
-      `cara mengatasi penyakit ${diseaseName} pada tanaman selada`
-    );
-    const url = `https://www.google.com/search?q=${searchTerm}`;
+  const navigation = useNavigation<any>();
 
-    Linking.openURL(url).catch(() => {
-      Alert.alert(
-        "Tidak dapat membuka browser",
-        "Tidak dapat membuka link pencarian. Silakan coba lagi nanti."
-      );
-    });
+  const handleMoreInfo = () => {
+    navigation.navigate("Artikel");
   };
 
   return (
@@ -27,11 +19,10 @@ export const TreatmentGuide: React.FC<Props> = ({ diseaseName }) => {
       <Text style={Styles.guideTitle}>Rekomendasi Penanganan</Text>
       <Text style={Styles.guideText}>
         Untuk informasi lebih lengkap tentang cara penanganan penyakit ini, Anda
-        dapat berkonsultasi dengan ahli pertanian atau mencari informasi
-        tambahan.
+        dapat membaca artikel-artikel terkait di fitur Artikel LetVision.
       </Text>
       <TouchableOpacity style={Styles.guideButton} onPress={handleMoreInfo}>
-        <Text style={Styles.guideButtonText}>Informasi Lebih Lanjut</Text>
+        <Text style={Styles.guideButtonText}>Buka Halaman Artikel</Text>
       </TouchableOpacity>
     </View>
   );

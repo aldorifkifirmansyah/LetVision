@@ -7,7 +7,6 @@ import {
   Alert,
   Image,
   TouchableOpacity,
-  Linking, // Tambahkan impor Linking
 } from "react-native";
 import {
   RouteProp,
@@ -19,8 +18,9 @@ import { Styles } from "../styles/Styles";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { historyService } from "../lib/utils/services/historyService";
 import { LabelInput } from "../components/LabelInput";
-import { v4 as uuidv4 } from "uuid";
+import uuid from "react-native-uuid";
 import { PenyakitInfo } from "../lib/utils/types/models";
+import { TreatmentGuide } from "../components/TreatmentGuide";
 
 type PredictionType = {
   bbox: number[];
@@ -54,7 +54,9 @@ export const DiseaseResult: React.FC<Props> = ({ route }) => {
   const [diseaseInfo, setDiseaseInfo] = useState<PenyakitInfo | null>(null);
   const [labelInput, setLabelInput] = useState("");
   const [isLabelLocked, setIsLabelLocked] = useState(false);
-  const [processingImageId, setProcessingImageId] = useState<string>(uuidv4());
+  const [processingImageId, setProcessingImageId] = useState<string>(
+    uuid.v4().toString()
+  );
   const hasBeenSaved = useRef(false);
 
   useEffect(() => {
@@ -166,21 +168,6 @@ export const DiseaseResult: React.FC<Props> = ({ route }) => {
     return () => backHandler.remove();
   }, []);
 
-  // Tambahkan fungsi handleMoreInfo
-  const handleMoreInfo = () => {
-    if (diseaseInfo) {
-      const searchQuery = `penyakit selada ${diseaseName}`;
-      const encodedQuery = encodeURIComponent(searchQuery);
-      const googleURL = `https://www.google.com/search?q=${encodedQuery}`;
-
-      Linking.openURL(googleURL).catch(() => {
-        Alert.alert("Gagal", "Tidak dapat membuka browser");
-      });
-    } else {
-      Alert.alert("Info", "Informasi lebih lanjut tidak tersedia saat ini.");
-    }
-  };
-
   return (
     <View style={Styles.container}>
       {isLoading ? (
@@ -223,7 +210,7 @@ export const DiseaseResult: React.FC<Props> = ({ route }) => {
             {preventionSteps.length > 0 && (
               <View style={Styles.sectionContainer}>
                 <View style={Styles.preventionContainer}>
-                  <Text style={Styles.preventionTitle}>Langkah Penanganan</Text>
+                  <Text style={Styles.preventionTitle}>Langkah Pencegahan</Text>
                   <View style={Styles.preventionContent}>
                     {preventionSteps.map((step, index) => (
                       <View key={index} style={Styles.preventionItem}>
@@ -239,21 +226,7 @@ export const DiseaseResult: React.FC<Props> = ({ route }) => {
             {/* Hanya tampilkan Panduan Lebih Lanjut jika penyakitnya BUKAN "Sehat" (ID 3) */}
             {diseaseInfo && diseaseInfo.id !== 3 && (
               <View style={Styles.sectionContainer}>
-                <View style={Styles.guideContainer}>
-                  <Text style={Styles.guideTitle}>Panduan Lebih Lanjut</Text>
-                  <Text style={Styles.guideText}>
-                    Dapatkan informasi lengkap tentang cara menangani{" "}
-                    {diseaseName} dan mencegah penyebaran lebih lanjut.
-                  </Text>
-                  <TouchableOpacity
-                    style={Styles.guideButton}
-                    onPress={handleMoreInfo}
-                  >
-                    <Text style={Styles.guideButtonText}>
-                      Pelajari Lebih Lanjut
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <TreatmentGuide diseaseName={diseaseName} />
               </View>
             )}
           </View>

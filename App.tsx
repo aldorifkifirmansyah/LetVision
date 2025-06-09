@@ -1,36 +1,61 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { MenuProvider } from "react-native-popup-menu";
+
+import { Ionicons } from "@expo/vector-icons";
+
+// Import screen
+import { SplashScreen } from "./screens/SplashScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { GrowthUpScreen } from "./screens/GrowthScreen";
 import { GrowthResult } from "./screens/GrowthResultScreen";
 import { DiseaseScreen } from "./screens/DiseaseScreen";
 import { DiseaseResult } from "./screens/DiseaseResultScreen";
+import { ArtikelScreen } from "./screens/ArtikelScreen";
+import { ArtikelViewerScreen } from "./screens/ArtikelViewerScreen"; // Pastikan file ini ada
 import { HistoryScreen } from "./screens/HistoryScreen";
-import { Ionicons } from "@expo/vector-icons";
-import { MenuProvider } from "react-native-popup-menu";
-import "react-native-get-random-values";
 import { GrowthHistoryDetailScreen } from "./screens/GrowthHistoryDetailScreen";
 import { DiseaseHistoryDetailScreen } from "./screens/DiseaseHistoryDetailScreen";
-import { ArtikelScreen } from "./screens/ArtikelScreen";
-import { ArtikelViewerScreen } from "./screens/ArtikelViewerScreen";
 
+// Hanya gunakan Stack Navigator
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <MenuProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
+        <Stack.Navigator
+          initialRouteName="Splash"
+          screenOptions={{
+            headerTintColor: "#4CAF50",
+            headerTitleStyle: { fontWeight: "bold" },
+            headerBackTitleVisible: false,
+          }}
+        >
+          {/* SplashScreen - layar pertama yang dimuat */}
+          <Stack.Screen
+            name="Splash"
+            component={SplashScreen}
+            options={{ headerShown: false }}
+          />
+
+          {/* HomeScreen - layar setelah splash selesai */}
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ title: "Beranda" }}
+            options={{
+              title: "LetVision",
+              // Perbaikan sintaks headerLeft
+              headerLeft: () => null, // Sintaks yang benar
+            }}
           />
+
+          {/* Fitur Utama */}
           <Stack.Screen
             name="GrowthUp"
             component={GrowthUpScreen}
-            options={{ title: "Deteksi Tahap Pertumbuhan" }}
+            options={{ title: "Deteksi Pertumbuhan" }}
           />
           <Stack.Screen
             name="GrowthResult"
@@ -48,51 +73,31 @@ export default function App() {
             options={{ title: "Hasil Deteksi Penyakit" }}
           />
           <Stack.Screen
-            name="History"
-            component={HistoryScreen}
-            options={{
-              title: "Riwayat Deteksi",
-              headerTitleStyle: {
-                color: "#2C3E50",
-                fontSize: 20,
-              },
-              headerStyle: {
-                elevation: 0,
-                shadowOpacity: 0,
-              },
-            }}
-          />
-          <Stack.Screen
-            name="GrowthHistoryDetail"
-            component={GrowthHistoryDetailScreen}
-            options={{
-              title: "Detail Pertumbuhan",
-              headerBackTitleVisible: false,
-            }}
-          />
-          <Stack.Screen
-            name="DiseaseHistoryDetail"
-            component={DiseaseHistoryDetailScreen}
-            options={{
-              title: "Detail Penyakit",
-              headerBackTitleVisible: false,
-            }}
-          />
-          <Stack.Screen
             name="Artikel"
             component={ArtikelScreen}
-            options={{
-              title: "Artikel",
-              headerBackTitleVisible: false,
-            }}
+            options={{ title: "Artikel" }}
           />
           <Stack.Screen
             name="ArtikelViewer"
             component={ArtikelViewerScreen}
-            options={({ route }) => ({
-              title: route.params.title,
-              headerBackTitleVisible: false,
-            })}
+            options={{ title: "Artikel" }}
+          />
+
+          {/* Riwayat */}
+          <Stack.Screen
+            name="History"
+            component={HistoryScreen}
+            options={{ title: "Riwayat" }}
+          />
+          <Stack.Screen
+            name="GrowthHistoryDetail"
+            component={GrowthHistoryDetailScreen}
+            options={{ title: "Detail Pertumbuhan" }}
+          />
+          <Stack.Screen
+            name="DiseaseHistoryDetail"
+            component={DiseaseHistoryDetailScreen}
+            options={{ title: "Detail Penyakit" }}
           />
         </Stack.Navigator>
       </NavigationContainer>

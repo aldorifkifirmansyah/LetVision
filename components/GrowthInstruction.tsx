@@ -4,11 +4,15 @@ import { GrowthGuideImage } from "./GrowthGuideImage";
 import { Styles } from "../styles/Styles";
 
 const instructions = [
-  "Pastikan pencahayaan cukup",
-  "Posisikan objek di tengah-tengah",
-  "Ambil jarak 30-50cm dari objek",
-  "Hindari pengambilan foto yang blur",
+  "Pastikan pencahayaan cukup dan merata (usahakan tanpa bayangan)",
+  "Posisikan satu tanaman selada yang akan diperiksa di tengah-tengah frame",
+  "Ambil gambar dari atas secara tegak lurus",
+  "Pastikan seluruh bagian tanaman selada terlihat dalam frame",
+  "Ambil jarak sekitar 30–50 cm dari tanaman",
+  "Hindari pengambilan gambar yang blur atau goyang",
+  "Jangan sampai ada objek asing yang menutupi tanaman selada"
 ];
+
 
 export const GrowthInstruction = () => (
   <View style={Styles.card}>

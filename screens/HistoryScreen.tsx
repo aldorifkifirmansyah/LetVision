@@ -5,7 +5,6 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  BackHandler,
   TouchableWithoutFeedback,
   Alert,
   TextInput,
@@ -24,13 +23,10 @@ import {
 import { Styles } from "../styles/Styles";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { HistoryMenu } from "../components/HistoryMenu";
 
 export const HistoryScreen = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [filterType, setFilterType] = useState<DetectionType | "all">("all");
-  const [isSelectMode, setIsSelectMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [editingLabel, setEditingLabel] = useState<string>("");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [charCountColor, setCharCountColor] = useState("#999999");
@@ -48,22 +44,6 @@ export const HistoryScreen = () => {
     if (filterType === "all") return true;
     return item.detectionType === filterType;
   });
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        filteredHistory.length > 0 ? (
-          <HistoryMenu
-            isSelectMode={isSelectMode}
-            selectedItemsCount={selectedItems.length}
-            onSelect={toggleSelectMode}
-            onDelete={deleteSelectedItems}
-            onCancel={cancelSelectionMode}
-            onSelectAll={selectAllItems}
-          />
-        ) : null,
-    });
-  }, [isSelectMode, selectedItems, filterType, filteredHistory.length]);
 
   const loadHistory = async () => {
     const items = await historyService.getHistory();
@@ -90,9 +70,6 @@ export const HistoryScreen = () => {
       ]}
       onPress={() => {
         setFilterType(type);
-        if (isSelectMode) {
-          cancelSelectionMode();
-        }
       }}
     >
       <Text
@@ -143,7 +120,7 @@ export const HistoryScreen = () => {
     }
   };
 
-  // Update renderItem untuk mendukung label pada semua tipe card
+  // Render item dengan fitur seleksi dihapus
   const renderItem = ({ item }: { item: HistoryItem }) => {
     // Badge untuk tipe deteksi
     const renderBadge = () => (
@@ -162,19 +139,8 @@ export const HistoryScreen = () => {
     );
 
     return (
-      <TouchableOpacity
-        onPress={() => handleItemPress(item)}
-        onLongPress={() => handleLongPress(item.id)}
-      >
-        <View
-          style={[
-            Styles.historyCard,
-            isSelectMode &&
-              selectedItems.includes(item.id) &&
-              Styles.selectedCard,
-            item.isPinned && Styles.pinnedCard,
-          ]}
-        >
+      <TouchableOpacity onPress={() => handleItemPress(item)}>
+        <View style={[Styles.historyCard, item.isPinned && Styles.pinnedCard]}>
           {/* Badge untuk tipe deteksi */}
           {renderBadge()}
 
@@ -255,7 +221,6 @@ export const HistoryScreen = () => {
                 <TouchableOpacity
                   style={Styles.labelCardContainer}
                   onPress={() =>
-                    !isSelectMode &&
                     startEditing(item.id, item.label || "No Label")
                   }
                 >
@@ -269,16 +234,10 @@ export const HistoryScreen = () => {
                   >
                     {item.label || "No Label"}
                   </Text>
-                  {!isSelectMode && (
-                    <View style={Styles.editIndicator}>
-                      <Ionicons
-                        name="pencil-outline"
-                        size={12}
-                        color="#4CAF50"
-                      />
-                      <Text style={Styles.editIndicatorText}>Edit</Text>
-                    </View>
-                  )}
+                  <View style={Styles.editIndicator}>
+                    <Ionicons name="pencil-outline" size={12} color="#4CAF50" />
+                    <Text style={Styles.editIndicatorText}>Edit</Text>
+                  </View>
                 </TouchableOpacity>
               )}
             </View>
@@ -287,7 +246,7 @@ export const HistoryScreen = () => {
           {/* Tombol pin diposisikan di kanan bawah */}
           <TouchableOpacity
             style={Styles.pinButton}
-            onPress={() => !isSelectMode && togglePin(item.id)}
+            onPress={() => togglePin(item.id)}
           >
             <Image
               source={require("../assets/pin-icon.png")}
@@ -301,87 +260,12 @@ export const HistoryScreen = () => {
   };
 
   const handleItemPress = (item: HistoryItem) => {
-    if (isSelectMode) {
-      toggleSelectItem(item.id);
-    } else {
-      // Navigasi ke screen detail riwayat berdasarkan tipe deteksi
-      if (isGrowthHistoryItem(item)) {
-        navigation.navigate("GrowthHistoryDetail", { historyItem: item });
-      } else if (isDiseaseHistoryItem(item)) {
-        navigation.navigate("DiseaseHistoryDetail", { historyItem: item });
-      }
+    // Navigasi ke screen detail riwayat berdasarkan tipe deteksi
+    if (isGrowthHistoryItem(item)) {
+      navigation.navigate("GrowthHistoryDetail", { historyItem: item });
+    } else if (isDiseaseHistoryItem(item)) {
+      navigation.navigate("DiseaseHistoryDetail", { historyItem: item });
     }
-  };
-
-  const toggleSelectMode = () => {
-    setIsSelectMode(!isSelectMode);
-    setSelectedItems([]);
-  };
-
-  const toggleSelectItem = (id: string) => {
-    setSelectedItems((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
-    );
-  };
-
-  const deleteSelectedItems = async () => {
-    if (selectedItems.length === 0) return;
-
-    Alert.alert(
-      "Konfirmasi Hapus",
-      `Apakah Anda yakin ingin menghapus ${selectedItems.length} item yang dipilih?`,
-      [
-        { text: "Batal", style: "cancel" },
-        {
-          text: "Hapus",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await historyService.deleteMultiple(selectedItems);
-              await loadHistory();
-              setIsSelectMode(false);
-              setSelectedItems([]);
-            } catch (error) {
-              console.error("Error deleting items:", error);
-              Alert.alert("Error", "Gagal menghapus item");
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const confirmDeleteSingle = (id: string) => {
-    Alert.alert(
-      "Konfirmasi Hapus",
-      "Apakah Anda yakin ingin menghapus item ini?",
-      [
-        { text: "Batal", style: "cancel" },
-        {
-          text: "Hapus",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await historyService.deleteHistory(id);
-              await loadHistory();
-            } catch (error) {
-              console.error("Error deleting item:", error);
-              Alert.alert("Error", "Gagal menghapus item");
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const cancelSelectionMode = () => {
-    setIsSelectMode(false);
-    setSelectedItems([]);
-  };
-
-  const selectAllItems = () => {
-    const allIds = filteredHistory.map((item) => item.id);
-    setSelectedItems(allIds);
   };
 
   const startEditing = (id: string, currentLabel: string) => {
@@ -408,21 +292,6 @@ export const HistoryScreen = () => {
       Alert.alert("Error", "Gagal mengupdate label");
     }
   };
-
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        if (isSelectMode) {
-          cancelSelectionMode();
-          return true;
-        }
-        return false;
-      }
-    );
-
-    return () => backHandler.remove();
-  }, [isSelectMode]);
 
   const EmptyState = ({
     filterType,
@@ -472,46 +341,15 @@ export const HistoryScreen = () => {
     }
   };
 
-  const handleLongPress = (id: string) => {
-    if (!isSelectMode) {
-      toggleSelectMode();
-      toggleSelectItem(id);
-    }
-  };
-
-  const MemoizedItem = React.memo(
-    ({ item }: { item: HistoryItem }) => renderItem({ item }),
-    (prevProps, nextProps) => {
-      // Custom comparison untuk menentukan apakah perlu re-render
-      return (
-        prevProps.item.id === nextProps.item.id &&
-        prevProps.item.isPinned === nextProps.item.isPinned &&
-        prevProps.item.label === nextProps.item.label
-      );
-    }
-  );
-
   return (
-    <TouchableWithoutFeedback
-      onPress={() => isSelectMode && cancelSelectionMode()}
-    >
+    <TouchableWithoutFeedback onPress={cancelEditing}>
       <View style={Styles.container}>
-        <View
-          style={[Styles.header, isSelectMode && Styles.headerSelectionMode]}
-        >
-          {isSelectMode ? (
-            <View style={Styles.selectionHeader}>
-              <Text style={Styles.selectionText}>
-                {selectedItems.length} item terpilih
-              </Text>
-            </View>
-          ) : (
-            <View style={Styles.filterContainer}>
-              <FilterButton type="all" title="Semua" />
-              <FilterButton type="growth" title="Pertumbuhan" />
-              <FilterButton type="disease" title="Penyakit" />
-            </View>
-          )}
+        <View style={Styles.header}>
+          <View style={Styles.filterContainer}>
+            <FilterButton type="all" title="Semua" />
+            <FilterButton type="growth" title="Pertumbuhan" />
+            <FilterButton type="disease" title="Penyakit" />
+          </View>
         </View>
 
         {filteredHistory.length === 0 ? (
@@ -522,8 +360,8 @@ export const HistoryScreen = () => {
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{
-              paddingBottom: 20, // Tambahkan padding bawah
-              paddingHorizontal: 2, // Tambahkan sedikit padding horizontal
+              paddingBottom: 20,
+              paddingHorizontal: 2,
             }}
             refreshControl={
               <RefreshControl

@@ -28,6 +28,12 @@ export interface GrowthHistoryItem extends BaseHistoryItem {
   // Tambahkan properti baru yang dibutuhkan
   nutrisiRekomendasi?: NutrisiRekomendasi[]; // Array rekomendasi nutrisi
   daysUntilHarvest?: number; // Jumlah hari hingga panen
+  ecMin?: number; // Nilai EC minimum
+  ecMax?: number; // Nilai EC maksimum
+  phMin?: number; // Nilai pH minimum
+  phMax?: number; // Nilai pH maksimum
+  abMix?: number; // Komposisi AB
+  poc?: number; // POC (Pupuk Organik Cair) dosis
 }
 
 // Interface untuk data penyakit (dari disease.ts)
