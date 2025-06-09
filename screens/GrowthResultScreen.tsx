@@ -245,10 +245,10 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
         const harvestDateInfo =
           harvestDate || calculateHarvestDate(stageData.estimasi_waktu_panen);
 
-        // Tambahkan id ke nutrientRecommendations untuk menyesuaikan dengan NutrisiRekomendasi interface
+        // Tambahkan id ke nutrientRecommendations
         const nutrientRecsWithId = nutrientRecommendations.map(
           (rec, index) => ({
-            id: index + 1, // Gunakan index sebagai id sementara
+            id: index + 1,
             nama: rec.nama,
             deskripsi: rec.deskripsi,
           })
@@ -260,24 +260,21 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
             .from("dosis_pupuk")
             .select(
               `
-            id,
-            dosis_ml,
-            pupuk_id,
-            pupuk:pupuk_id(id, nama_pupuk)
-          `
+          id,
+          dosis_ml,
+          pupuk_id,
+          pupuk:pupuk_id(id, nama_pupuk)
+        `
             )
             .eq("tahap_id", adjustedClassId);
 
-          // Buat objek dengan data pupuk untuk disimpan
-          const fertilizerData = fertilizerDoses
-            ? fertilizerDoses.reduce((acc, dose) => {
-                if (dose.pupuk) {
-                  // Gunakan nama_pupuk sebagai key dan dosis_ml sebagai value
-                  acc[dose.pupuk.nama_pupuk] = dose.dosis_ml;
-                }
-                return acc;
-              }, {} as Record<string, number>)
-            : {};
+          // Konversi data pupuk ke format baru PupukDosis[]
+          const pupukDosis =
+            fertilizerDoses && fertilizerDoses.length > 0
+              ? fertilizerDoses.filter(
+                  (dose) => dose.pupuk && dose.dosis_ml > 0
+                )
+              : [];
 
           // Simpan dengan data lengkap termasuk data nutrisi
           await historyService.saveHistory({
@@ -291,15 +288,12 @@ export const GrowthResult: React.FC<Props> = ({ route }) => {
             daysUntilHarvest: harvestDateInfo?.daysUntilHarvest,
             nutrisiRekomendasi: nutrientRecsWithId,
             label: "No Label",
-            // Data EC dan pH dari tabel tahap_pertumbuhan
             ecMin: stageData.ec_min,
             ecMax: stageData.ec_max,
             phMin: stageData.ph_min,
             phMax: stageData.ph_max,
-            // Tambahkan data pupuk dari fertilizerData
-            ...fertilizerData,
-            // Tambahkan keterangan jika tersedia
-            ...(stageData.keterangan && { keterangan: stageData.keterangan }),
+            pupukDosis: pupukDosis,
+            keterangan: stageData.keterangan,
           });
 
           hasBeenSaved.current = true;

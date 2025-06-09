@@ -11,49 +11,49 @@ export interface BaseHistoryItem {
   pinnedAt?: string;
 }
 
-// Pastikan interface NutrisiRekomendasi memiliki definisi yang tepat
+// Interface untuk rekomendasi nutrisi
 export interface NutrisiRekomendasi {
   id: number;
   nama: string;
   deskripsi: string;
 }
 
-// Interface untuk growth history (dari history.ts)
+// Interface untuk data pupuk
+export interface PupukDosis {
+  nama_pupuk: string;
+  dosis_ml: number;
+}
+
+// Interface untuk growth history yang menggunakan struktur baru
 export interface GrowthHistoryItem extends BaseHistoryItem {
   detectionType: "growth";
   tahapId?: number;
   tahapNama?: string;
-  estimasiPanen?: string; // Format: "±X hari" where X is a number
+  estimasiPanen?: string;
   harvestDate?: string;
-  // Tambahkan properti baru yang dibutuhkan
-  nutrisiRekomendasi?: NutrisiRekomendasi[]; // Array rekomendasi nutrisi
-  daysUntilHarvest?: number; // Jumlah hari hingga panen
-  ecMin?: number; // Nilai EC minimum
-  ecMax?: number; // Nilai EC maksimum
-  phMin?: number; // Nilai pH minimum
-  phMax?: number; // Nilai pH maksimum
-  abMix?: number; // Komposisi AB
-  poc?: number; // POC (Pupuk Organik Cair) dosis
+  daysUntilHarvest?: number;
+  nutrisiRekomendasi?: NutrisiRekomendasi[];
+  pupukDosis?: PupukDosis[]; // Struktur baru untuk pupuk dinamis
+  ecMin?: number;
+  ecMax?: number;
+  phMin?: number;
+  phMax?: number;
+  keterangan?: string;
 }
 
-// Interface untuk data penyakit (dari disease.ts)
-export interface PenyakitInfo {
-  id: number;
-  nama: string;
-  deskripsi: string;
-}
-
+// Interface untuk penanganan penyakit
 export interface PenangananItem {
   id: number;
   langkah: string;
 }
 
-// Interface untuk disease history (dari disease.ts)
+// Interface untuk disease history
 export interface DiseaseHistoryItem extends BaseHistoryItem {
   detectionType: "disease";
   penyakitId: number;
   penyakitNama: string;
   deskripsi: string;
+  penanganan?: PenangananItem[];
 }
 
 // Union type untuk item history
@@ -70,4 +70,38 @@ export function isDiseaseHistoryItem(
   item: HistoryItem
 ): item is DiseaseHistoryItem {
   return item.detectionType === "disease";
+}
+
+// Interface untuk data tahap pertumbuhan
+export interface TahapPertumbuhan {
+  id: number;
+  nama: string;
+  estimasi_waktu_panen: string;
+  ec_min: number;
+  ec_max: number;
+  ph_min: number;
+  ph_max: number;
+  keterangan?: string;
+}
+
+// Interface untuk data pupuk
+export interface Pupuk {
+  id: number;
+  nama_pupuk: string;
+}
+
+// Interface untuk dosis pupuk
+export interface DosisPupuk {
+  id: number;
+  tahap_id: number;
+  pupuk_id: number;
+  dosis_ml: number;
+  pupuk?: Pupuk;
+}
+
+// Interface untuk data penyakit
+export interface PenyakitInfo {
+  id: number;
+  nama: string;
+  deskripsi: string;
 }

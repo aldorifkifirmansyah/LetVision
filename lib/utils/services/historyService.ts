@@ -49,6 +49,40 @@ const saveHistory = async (
       ...(item as any), // Tambahkan semua properti lainnya
     };
 
+    // Jika item adalah GrowthHistoryItem dan memiliki data pupuk dalam format lama (top-level properties),
+    // konversi ke format baru (pupukDosis array)
+    if (isGrowthHistoryItem(newItem) && !newItem.pupukDosis) {
+      // Filter semua key-value pairs yang mungkin mewakili pupuk (non-standard properties)
+      const pupukEntries = Object.entries(newItem as any).filter(
+        ([key, value]) =>
+          typeof value === "number" &&
+          ![
+            "id",
+            "tahapId",
+            "ecMin",
+            "ecMax",
+            "phMin",
+            "phMax",
+            "daysUntilHarvest",
+          ].includes(key)
+      );
+
+      if (pupukEntries.length > 0) {
+        // Konversi ke format pupukDosis
+        (newItem as GrowthHistoryItem).pupukDosis = pupukEntries.map(
+          ([nama, dosis]) => ({
+            nama_pupuk: nama,
+            dosis_ml: dosis as number,
+          })
+        );
+
+        // Hapus properti lama
+        pupukEntries.forEach(([key]) => {
+          delete (newItem as any)[key];
+        });
+      }
+    }
+
     // Ambil history yang sudah ada
     const history = await getHistory();
 

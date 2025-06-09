@@ -22,12 +22,6 @@ export const GrowthActionButtons: React.FC<GrowthActionButtonsProps> = ({
   onTakePhoto,
 }) => (
   <View style={styles.fixedContainer}>
-    {isLoading ? (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Tunggu sebentar yah 😋</Text>
-      </View>
-    ) : (
       <View style={styles.buttonsRow}>
         {/* Tombol Kamera sekarang berada di atas */}
         <TouchableOpacity
@@ -61,8 +55,7 @@ export const GrowthActionButtons: React.FC<GrowthActionButtonsProps> = ({
           </View>
         </TouchableOpacity>
       </View>
-    )}
-  </View>
+    </View>
 );
 
 const { width } = Dimensions.get("window");
