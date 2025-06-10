@@ -1,7 +1,6 @@
 const BLOG_ID = "2454819260619917191";
 const API_KEY = "AIzaSyDvcAvBn-8Ck6YmkTyMegHgwtGrXpMEZfE";
 
-// https://www.googleapis.com/blogger/v3/blogs/315348064147604/posts?key=AIzaSyDvcAvBn-8Ck6YmkTyMegHgwtGrXpMEZfE
 
 export interface BlogArticle {
   id: string;

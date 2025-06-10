@@ -123,8 +123,6 @@ export const DiseaseResult: React.FC<Props> = ({ route }) => {
         // Update state lokal
         setLabelInput(trimmedLabel);
         setIsLabelLocked(true);
-
-        Alert.alert("Label Disimpan", "Label berhasil disimpan");
       } catch (error) {
         Alert.alert(
           "Gagal Menyimpan",
