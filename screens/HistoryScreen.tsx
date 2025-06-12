@@ -139,7 +139,11 @@ export const HistoryScreen = () => {
     );
 
     return (
-      <TouchableOpacity onPress={() => handleItemPress(item)}>
+      <TouchableOpacity
+        onPress={() => handleItemPress(item)}
+        // Jangan propagasi tap event ke parent jika sedang mengedit
+        activeOpacity={editingItemId === item.id ? 1 : 0.7}
+      >
         <View style={[Styles.historyCard, item.isPinned && Styles.pinnedCard]}>
           {/* Badge untuk tipe deteksi */}
           {renderBadge()}
@@ -169,55 +173,65 @@ export const HistoryScreen = () => {
 
               {/* Label section untuk semua tipe card (growth dan disease) */}
               {editingItemId === item.id ? (
-                <View style={Styles.labelEditContainer}>
-                  <View style={Styles.labelEditHeader}>
-                    <Text style={Styles.labelEditTitle}>
-                      Label{" "}
-                      {item.detectionType === "growth" ? "Tanaman" : "Penyakit"}
-                      :
-                    </Text>
-                    <Text style={Styles.labelEditHint}>
-                      Maksimal 15 karakter
-                    </Text>
-                  </View>
-                  <TextInput
-                    style={Styles.labelEditInput}
-                    value={editingLabel}
-                    onChangeText={(text) => {
-                      setEditingLabel(text);
-                      // Update warna penghitung karakter berdasarkan panjang
-                      if (text.length > 12) {
-                        setCharCountColor("#FF5252");
-                      } else if (text.length > 9) {
-                        setCharCountColor("#FFA726");
-                      } else {
-                        setCharCountColor("#999999");
-                      }
-                    }}
-                    autoFocus
-                    maxLength={15}
-                  />
-                  <Text
-                    style={[Styles.charCountText, { color: charCountColor }]}
-                  >
-                    {editingLabel.length}/15 karakter
-                  </Text>
-                  <View style={Styles.labelEditButtons}>
-                    <TouchableOpacity
-                      style={[Styles.labelEditButton, Styles.labelSaveButton]}
-                      onPress={() => saveLabel(item.id)}
+                // Saat mengedit, gunakan TouchableWithoutFeedback untuk mencegah klik event keluar
+                <TouchableWithoutFeedback
+                  onPress={(e) => {
+                    // Mencegah event klik sampai ke parent
+                    e.stopPropagation();
+                  }}
+                >
+                  <View style={Styles.labelEditContainer}>
+                    <View style={Styles.labelEditHeader}>
+                      <Text style={Styles.labelEditTitle}>
+                        Label{" "}
+                        {item.detectionType === "growth"
+                          ? "Tanaman"
+                          : "Penyakit"}
+                        :
+                      </Text>
+                      <Text style={Styles.labelEditHint}>
+                        Maksimal 15 karakter
+                      </Text>
+                    </View>
+                    <TextInput
+                      style={Styles.labelEditInput}
+                      value={editingLabel}
+                      onChangeText={(text) => {
+                        setEditingLabel(text);
+                        // Kode warna penghitung karakter tidak berubah
+                        if (text.length > 12) {
+                          setCharCountColor("#FF5252");
+                        } else if (text.length > 9) {
+                          setCharCountColor("#FFA726");
+                        } else {
+                          setCharCountColor("#999999");
+                        }
+                      }}
+                      autoFocus
+                      maxLength={15}
+                    />
+                    <Text
+                      style={[Styles.charCountText, { color: charCountColor }]}
                     >
-                      <Text style={Styles.labelEditButtonText}>Simpan</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[Styles.labelEditButton, Styles.labelCancelButton]}
-                      onPress={cancelEditing}
-                    >
-                      <Text style={Styles.labelEditButtonText}>Batal</Text>
-                    </TouchableOpacity>
+                      {editingLabel.length}/15 karakter
+                    </Text>
+                    
+                    {/* Hanya tampilkan tombol Simpan */}
+                    <View style={[Styles.labelEditButtons, Styles.singleButtonContainer]}>
+                      <TouchableOpacity
+                        style={[Styles.labelEditButton, Styles.labelSaveButton, Styles.fullWidthButton]}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          saveLabel(item.id);
+                        }}
+                      >
+                        <Text style={Styles.labelEditButtonText}>Simpan</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
+                </TouchableWithoutFeedback>
               ) : (
+                // Tampilan label biasa tetap sama
                 <TouchableOpacity
                   style={Styles.labelCardContainer}
                   onPress={() =>
@@ -369,6 +383,8 @@ export const HistoryScreen = () => {
                 onRefresh={handleRefresh}
               />
             }
+            // Tambahkan ini untuk memastikan klik pada FlatList juga akan menutup edit
+            onScrollBeginDrag={cancelEditing}
           />
         )}
       </View>
