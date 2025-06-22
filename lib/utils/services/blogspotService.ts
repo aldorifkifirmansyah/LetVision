@@ -1,5 +1,5 @@
 const BLOG_ID = "2454819260619917191";
-const API_KEY = "AIzaSyDvcAvBn-8Ck6YmkTyMegHgwtGrXpMEZfE";
+const API_KEY = "rahasia";
 
 
 export interface BlogArticle {
